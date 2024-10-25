@@ -1,66 +1,59 @@
 import React, { useState } from 'react';
 
-export const ArticleForm = function ({ onSubmit }) {
+export const ArticleForm = ({ onSubmit }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [authorName, setAuthorName] = useState('');
-  const [authorEmail, setAuthorEmail] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [tags, setTags] = useState('');
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
     const articleData = {
       title,
       content,
-      name: authorName,
-      email: authorEmail,
-      tags
+      name,
+      email,
+      tags,
     };
-
-    try {
-      const response = await fetch('/wiki', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(articleData),
-      });
-
-      if (response.ok) {
-        // Reset form and close adding mode
-        onSubmit(false); // Close the form
-        // Optionally, fetch new pages here to update the list
-      } else {
-        console.error('Failed to add article');
-      }
-    } catch (err) {
-      console.error('Error:', err);
-    }
-  }
+    onSubmit(articleData);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
-      <label>
-        Title:
-        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-      </label>
-      <label>
-        Content:
-        <input value={content} onChange={(e) => setContent(e.target.value)} required />
-      </label>
-      <label>
-        Author Name:
-        <input type="text" value={authorName} onChange={(e) => setAuthorName(e.target.value)} required />
-      </label>
-      <label>
-        Author Email:
-        <input type="email" value={authorEmail} onChange={(e) => setAuthorEmail(e.target.value)} required />
-      </label>
-      <label>
-        Tags (space-separated):
-        <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} />
-      </label>
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <textarea
+        placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Author Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+      <input
+        type="email"
+        placeholder="Author Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Tags (space-separated)"
+        value={tags}
+        onChange={(e) => setTags(e.target.value)}
+      />
       <button type="submit">Submit</button>
     </form>
   );

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { PagesList } from './PagesList';
 import { Page } from './Page';
-import { ArticleForm} from './ArticleForm'
+import { ArticleForm } from './ArticleForm';
 import apiURL from '../api';
 
 export const App = function () {
   const [pages, setPages] = useState([]);
   const [selectedPage, setSelectedPage] = useState(null);
-  const [addingArticle, setAddingArticle] = useState(false)
+  const [isAddingArticle, setIsAddingArticle] = useState(false);
 
   useEffect(function () {
     async function fetchPages() {
@@ -23,21 +23,39 @@ export const App = function () {
     fetchPages();
   }, []);
 
-
-//fetch article details
+  // Fetch article details
   async function articleDetailFetch(slug) {
     const response = await fetch(`${apiURL}/wiki/${slug}`);
     const data = await response.json();
     setSelectedPage(data);
   }
-//reset selected page state
+
+  // Reset selected page state
   function resetSelectedPage() {
     setSelectedPage(null);
   }
 
-//toggle adding article state
-  function resetAddingArticle() {
-    setAddingArticle(!addingArticle);
+  // Toggle adding article state
+  function toggleAddingArticle() {
+    setIsAddingArticle(!isAddingArticle);
+  }
+
+  // Handle article submission
+  async function handleArticleSubmit(articleData) {
+    try {
+      const response = await fetch(`${apiURL}/wiki`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(articleData),
+      });
+      const data = await response.json();
+      setPages([...pages, data]); // Add newly created article to pages
+      setIsAddingArticle(false); // Close the form
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
@@ -45,12 +63,12 @@ export const App = function () {
       <h1>WikiVerse</h1>
       <h2>An interesting📚</h2>
 
-      <button onClick={resetAddingArticle}>
-        {addingArticle ? 'Cancel' : 'Add Article'}
+      <button onClick={toggleAddingArticle}>
+        {isAddingArticle ? 'Cancel' : 'Add Article'}
       </button>
 
-      {addingArticle ? (
-        <ArticleForm onSubmit={resetAddingArticle} />
+      {isAddingArticle ? (
+        <ArticleForm onSubmit={handleArticleSubmit} />
       ) : selectedPage ? (
         <Page article={selectedPage} onBack={resetSelectedPage} />
       ) : (
