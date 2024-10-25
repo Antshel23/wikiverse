@@ -1,31 +1,62 @@
-import React, { useEffect, useState } from 'react'
-import { PagesList } from './PagesList'
+import React, { useEffect, useState } from 'react';
+import { PagesList } from './PagesList';
+import { Page } from './Page';
+import { ArticleForm} from './ArticleForm'
+import apiURL from '../api';
 
-// import and prepend the api url to any fetch calls
-import apiURL from '../api'
+export const App = function () {
+  const [pages, setPages] = useState([]);
+  const [selectedPage, setSelectedPage] = useState(null);
+  const [addingArticle, setAddingArticle] = useState(false)
 
-export const App = () => {
-  const [pages, setPages] = useState([])
-
-  useEffect(() => {
-    async function fetchPages () {
+  useEffect(function () {
+    async function fetchPages() {
       try {
-        const response = await fetch(`${apiURL}/wiki`)
-        const pagesData = await response.json()
-        setPages(pagesData)
+        const response = await fetch(`${apiURL}/wiki`);
+        const pagesData = await response.json();
+        setPages(pagesData);
       } catch (err) {
-        console.log('Oh no an error! ', err)
+        console.log(err);
       }
     }
 
-    fetchPages()
-  }, [])
+    fetchPages();
+  }, []);
+
+
+//fetch article details
+  async function articleDetailFetch(slug) {
+    const response = await fetch(`${apiURL}/wiki/${slug}`);
+    const data = await response.json();
+    setSelectedPage(data);
+  }
+//reset selected page state
+  function resetSelectedPage() {
+    setSelectedPage(null);
+  }
+
+//toggle adding article state
+  function resetAddingArticle() {
+    setAddingArticle(!addingArticle);
+  }
 
   return (
-		<main>
+    <main>
       <h1>WikiVerse</h1>
-			<h2>An interesting 📚</h2>
-			<PagesList pages={pages} />
-		</main>
-  )
-}
+      <h2>An interesting📚</h2>
+
+      <button onClick={resetAddingArticle}>
+        {addingArticle ? 'Cancel' : 'Add Article'}
+      </button>
+
+      {addingArticle ? (
+        <ArticleForm onSubmit={resetAddingArticle} />
+      ) : selectedPage ? (
+        <Page article={selectedPage} onBack={resetSelectedPage} />
+      ) : (
+        <PagesList pages={pages} onSelect={articleDetailFetch} />
+      )}
+    </main>
+  );
+};
+
